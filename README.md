@@ -2,35 +2,61 @@
 
 ## Goal
 
-Many teams waste time searching through documentation or handling simple incidents manually.
+Reduce manual effort in handling incidents and common support questions by combining Slack, ServiceNow, and a local AI model (Ollama).
 
-This project builds a Slack bot that gives quick access to AI directly in Slack. It can answer questions using documentation and help with common issues without needing to search for information.
+The system provides AI responses in Slack and automatically forwards ServiceNow incidents to Slack channels.
 
-It is powered by a local AI model (Mistral via Ollama), so everything runs locally.
+---
 
-The goal is to also automate simple incident responses in ServiceNow where possible, reducing manual work and speeding up support.
+## Current architecture
+
+### ServiceNow → Slack (incident notifications)
+
+ServiceNow incident created  
+        ↓  
+Business Rule / Scripted REST call  
+        ↓  
+FastAPI webhook (/servicenow/p1)  
+        ↓  
+Python processes payload  
+        ↓  
+Slack API sends message  
+        ↓  
+P1 Slack channel notification  
+
+---
+
+### Slack → AI assistant (Ollama)
+
+User mentions bot in Slack (@IncidentBot)  
+        ↓  
+Slack Socket Mode event  
+        ↓  
+Python Slack Bolt handler  
+        ↓  
+Local AI model (Ollama / Mistral)  
+        ↓  
+Generated response  
+        ↓  
+Reply sent back in Slack thread  
 
 ---
 
 ## Status
 
-- Bot is connected to Slack using socket mode  
-- It can receive messages and @mentions  
-- Basic event handling is working locally (like app_mention)
-- Messages are processed by a local AI model (Mistral served via Ollama) and sent to Slack
+- Slack bot connected via Socket Mode  
+- AI responses from Ollama working via @mentions  
+- FastAPI receives ServiceNow incident webhooks  
+- ServiceNow P1 incidents are sent to Slack  
+- Local environment uses ngrok for webhook exposure  
 
 ---
 
-## Current Flow
+## Next steps
 
-Slack message → bot receives event → AI processes message → response is sent back to Slack  
-
----
-
-## Next Steps
-
-- Connect to internal documentation to improve AI understanding of incidents  
-- Improve routing and classification of different request types  
-- Integrate ServiceNow to automatically create and update incident tickets  
-- Add automatic responses in ServiceNow for incoming incidents when resolution is simple  
-- Improve response quality, structure, and consistency  
+- Improve AI prompts for incident understanding  
+- Add automatic incident classification (P1, P2, P3)  
+- Connect internal documentation to AI responses  
+- Add Slack commands for incident creation  
+- Improve message formatting in Slack  
+- Reduce manual steps in ServiceNow handling  
